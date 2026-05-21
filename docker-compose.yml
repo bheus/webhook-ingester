@@ -8,10 +8,10 @@ services:
     pull_policy: build
     container_name: webhook-ingester
     restart: unless-stopped
-    env_file:
-      - ./stack.env
     environment:
       LOKI_URL: ${LOKI_URL:-http://host.docker.internal:3100}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      RESEND_WEBHOOK_SECRET: ${RESEND_WEBHOOK_SECRET:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:

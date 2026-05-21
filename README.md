@@ -23,13 +23,16 @@ The full event JSON is the log line. Alerts then run `count_over_time` over `{pr
 
 Deployed via Portainer Git stack on `apple-pi.lan`. Cloudflared tunnel routes `webhooks.builtbybrendan.com` → `http://localhost:8019`.
 
+**Portainer Git stacks fetch only the compose file**, so `stack.env` does not exist on the host. Set environment variables (`STRIPE_WEBHOOK_SECRET`, `RESEND_WEBHOOK_SECRET`, optionally `LOKI_URL`) in Portainer's stack env editor — compose substitutes them at deploy time.
+
+Local dev (outside Portainer):
+
 ```bash
 git clone git@github.com:bheus/webhook-ingester.git
 cd webhook-ingester
 cp stack.env.example stack.env
 # fill in STRIPE_WEBHOOK_SECRET and RESEND_WEBHOOK_SECRET
-docker compose build
-docker compose up -d
+export $(grep -v '^#' stack.env | xargs) && docker compose up -d --build
 ```
 
 Loki is reached via `host.docker.internal:3100` (Loki bound on the host).
