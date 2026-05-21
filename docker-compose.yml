@@ -1,0 +1,18 @@
+name: webhook-ingester
+
+services:
+  ingester:
+    build:
+      context: .
+    image: webhook-ingester:${TAG:-local}
+    pull_policy: build
+    container_name: webhook-ingester
+    restart: unless-stopped
+    env_file:
+      - ./stack.env
+    environment:
+      LOKI_URL: ${LOKI_URL:-http://host.docker.internal:3100}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8019:8000"
