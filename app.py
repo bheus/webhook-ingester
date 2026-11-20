@@ -46,11 +46,12 @@ def stripe_webhook():
     payload = request.get_data()
     sig = request.headers.get("Stripe-Signature", "")
     try:
-        event = stripe.Webhook.construct_event(payload, sig, STRIPE_WEBHOOK_SECRET)
-    except (ValueError, stripe.error.SignatureVerificationError) as e:
+        stripe.Webhook.construct_event(payload, sig, STRIPE_WEBHOOK_SECRET)
+    except (ValueError, stripe.SignatureVerificationError) as e:
         log.warning("stripe sig verify failed: %s", e)
         return "bad signature", 400
 
+    event = json.loads(payload)
     event_type = event.get("type", "unknown")
     push_to_loki(
         {"job": "webhooks", "provider": "stripe", "event_type": event_type},
@@ -72,10 +73,12 @@ def resend_webhook():
     }
     try:
         wh = Webhook(RESEND_WEBHOOK_SECRET)
-        event = wh.verify(payload, headers)
+        wh.verify(payload, headers)
     except WebhookVerificationError as e:
         log.warning("resend sig verify failed: %s", e)
         return "bad signature", 400
+
+    event = json.loads(payload)
 
     event_type = event.get("type", "unknown")
     push_to_loki(
